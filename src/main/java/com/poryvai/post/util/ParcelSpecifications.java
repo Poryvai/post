@@ -76,6 +76,11 @@ public class ParcelSpecifications {
                 predicates.add(root.get("deliveryType").in(params.getDeliveryTypes()));
             }
 
+            // 8. Filter by parcel descriptions
+            if (params.getParcelDescriptions() != null && !params.getParcelDescriptions().isEmpty()) {
+                predicates.add(root.get("description").in(params.getParcelDescriptions())); // <-- ДОБАВЬТЕ ЭТОТ БЛОК
+            }
+
             // Combine all collected predicates with an AND logical operator.
             // If no predicates, it will result in a query that fetches all records (effectively 'true').
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

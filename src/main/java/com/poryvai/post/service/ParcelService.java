@@ -20,7 +20,7 @@ public interface ParcelService {
      *
      * @param trackingNumber The unique tracking number used to identify the parcel.
      * @return The {@link Parcel} object corresponding to the given tracking number.
-     * @throws com.example.demo.exception.NotFoundException if no parcel with the specified tracking number is found.
+     * @throws com.poryvai.post.exception.NotFoundException if no parcel with the specified tracking number is found.
      * This exception is typically handled by a global exception handler (e.g., RestExceptionHandler).
      */
     Parcel getByTrackingNumber(String trackingNumber);
@@ -29,7 +29,7 @@ public interface ParcelService {
      * Retrieves a paginated and filtered list of parcels.
      * This method supports dynamic queries based on various search parameters.
      *
-     * @param params   An object containing optional search criteria (e.g., sender, recipient, status).
+     * @param params   An object containing optional search criteria (e.g., sender, recipient, status, parcel descriptions).
      * @param pageable An object defining pagination (page number, size) and sorting options.
      * @return A {@link Page} of {@link Parcel} objects that match the criteria.
      */
@@ -37,7 +37,8 @@ public interface ParcelService {
 
     /**
      * Builds and returns a statistical summary of parcels based on specified search parameters.
-     * This includes aggregate data such as total counts, averages, and counts by different categories.
+     * This includes aggregate data such as total counts, averages, and counts by different categories,
+     * and counts by parcel description types.
      *
      * @param params An object containing optional filters to scope the statistics calculation.
      * @return A {@link ParcelStatistic} object containing the aggregated statistical data.
@@ -47,7 +48,7 @@ public interface ParcelService {
     /**
      * Creates a new parcel based on the provided request data.
      * This method handles the generation of tracking numbers, price calculation,
-     * and initial status setting for the parcel.
+     * and initial status setting, and assigning the parcel's description.
      *
      * @param request The {@link CreateParcelRequest} containing all necessary data for parcel creation.
      * @return The newly created {@link Parcel} object, persisted in the database.
@@ -62,7 +63,7 @@ public interface ParcelService {
      * @param trackingNumber The unique tracking number of the parcel to be updated.
      * @param status         The new {@link ParcelStatus} to set for the parcel.
      * @return The updated {@link Parcel} object.
-     * @throws com.example.demo.exception.NotFoundException if no parcel with the specified tracking number is found.
+     * @throws com.poryvai.post.exception.NotFoundException if no parcel with the specified tracking number is found.
      * This exception is typically handled by a global exception handler (e.g., RestExceptionHandler).
      */
     Parcel updateStatus(String trackingNumber, ParcelStatus status);

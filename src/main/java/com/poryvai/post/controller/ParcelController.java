@@ -7,6 +7,7 @@ import com.poryvai.post.dto.UpdateParcelStatusRequest;
 import com.poryvai.post.model.Parcel;
 import com.poryvai.post.model.ParcelStatus;
 import com.poryvai.post.service.ParcelService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -85,7 +86,7 @@ public class ParcelController {
      * to handle validation errors (HTTP 400).
      */
     @PostMapping
-    public Parcel create(@RequestBody CreateParcelRequest request) {
+    public Parcel create(@Valid @RequestBody CreateParcelRequest request) {
         return parcelService.create(request);
     }
 

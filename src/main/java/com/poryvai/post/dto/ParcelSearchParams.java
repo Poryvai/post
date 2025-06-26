@@ -1,6 +1,7 @@
 package com.poryvai.post.dto;
 
 import com.poryvai.post.model.DeliveryType;
+import com.poryvai.post.model.ParcelDescription;
 import com.poryvai.post.model.ParcelStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -68,4 +69,11 @@ public class ParcelSearchParams {
      */
     @Builder.Default
     private List<DeliveryType> deliveryTypes = new ArrayList<>();
+
+    /**
+     * A list of parcel descriptions to include in the search.
+     * Parcels with any of the specified delivery types will be returned.
+     */
+    @Builder.Default
+    private List<ParcelDescription> parcelDescriptions = new ArrayList<>();
 }

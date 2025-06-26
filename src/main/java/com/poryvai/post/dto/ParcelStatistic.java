@@ -2,6 +2,7 @@ package com.poryvai.post.dto;
 
 import com.poryvai.post.model.DeliveryType;
 import com.poryvai.post.model.Parcel;
+import com.poryvai.post.model.ParcelDescription;
 import com.poryvai.post.model.ParcelStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +47,11 @@ public class ParcelStatistic {
      * A map showing the count of parcels for each delivery type (e.g., DEFAULT, EXPRESS, ECONOM).
      */
     private Map<DeliveryType, Long> parcelsCountByDeliveryType;
+
+    /**
+     * A map showing the count of parcels for each description type (e.g., CLOTHES, SPARE_PARTS, GROCERIES, BOOKS, MEDICATIONS, HOME_APPLIANCES).
+     */
+    private Map<ParcelDescription, Long> parcelsCountByDescription;
 
     /**
      * The parcel with the highest price among those matching the search criteria.
