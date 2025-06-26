@@ -1,0 +1,53 @@
+# macOS system files
+.DS_Store
+
+# Logs
+*.log
+logs/
+*.out
+spring.log
+
+# Compiled class files
+*.class
+
+# Gradle build
+.gradle/
+build/
+
+# Gradle Wrapper
+!gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
+
+# IDEs
+
+## IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+## Eclipse
+.project
+.classpath
+.csettings/
+.settings/
+bin/
+
+## NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+## VS Code
+.vscode/
+
+# Environment files
+.env
+.env.*
+
+# OS generated files
+Thumbs.db
