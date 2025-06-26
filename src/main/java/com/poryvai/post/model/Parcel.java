@@ -73,4 +73,12 @@ public class Parcel {
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_type", nullable = false, length = 20)
     private DeliveryType deliveryType;
+
+    /**
+     * The type of description chosen for the parcel.
+     * Stored as a string in the database.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "description", nullable = false, length = 20)
+    private ParcelDescription parcelDescription;
 }

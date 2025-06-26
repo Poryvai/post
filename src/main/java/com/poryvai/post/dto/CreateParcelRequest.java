@@ -1,6 +1,8 @@
 package com.poryvai.post.dto;
 
 import com.poryvai.post.model.DeliveryType;
+import com.poryvai.post.model.ParcelDescription;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,4 +36,11 @@ public class CreateParcelRequest {
      * The requested delivery type for the parcel. Can be null, defaulting to DEFAULT.
      */
     private DeliveryType deliveryType;
+
+    /**
+     * The description category of the parcel's contents (e.g., CLOTHES, BOOKS).
+     * This field is required when creating a new parcel.
+     */
+    @NotNull
+    private ParcelDescription parcelDescription;
 }

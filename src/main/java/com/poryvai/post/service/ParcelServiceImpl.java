@@ -7,6 +7,7 @@ import com.poryvai.post.dto.ParcelStatistic;
 import com.poryvai.post.exception.NotFoundException;
 import com.poryvai.post.model.DeliveryType;
 import com.poryvai.post.model.Parcel;
+import com.poryvai.post.model.ParcelDescription;
 import com.poryvai.post.model.ParcelStatus;
 import com.poryvai.post.repository.ParcelRepository;
 import com.poryvai.post.service.parcel.price.PriceCalculator;
@@ -94,6 +95,9 @@ public class ParcelServiceImpl implements ParcelService {
         Map<DeliveryType, Long> parcelsCountByDeliveryType = Arrays.stream(DeliveryType.values())
                 .collect(Collectors.toMap(type -> type, type -> 0L));
 
+        Map<ParcelDescription, Long> parcelsCountByDescription = Arrays.stream(ParcelDescription.values())
+                .collect(Collectors.toMap(description -> description, description -> 0L));
+
         // Variables to track min/max parcels by price and weight.
         Parcel mostExpensiveParcel = null;
         Parcel cheapestParcel = null;
@@ -105,9 +109,10 @@ public class ParcelServiceImpl implements ParcelService {
                 totalWeight += parcel.getWeight();
                 totalPrice += parcel.getPrice();
 
-                // Aggregate counts for status and delivery type.
+                // Aggregate counts for status, delivery type, and parcel description
                 parcelsCountByStatus.merge(parcel.getStatus(), 1L, Long::sum);
                 parcelsCountByDeliveryType.merge(parcel.getDeliveryType(), 1L, Long::sum);
+                parcelsCountByDescription.merge(parcel.getParcelDescription(), 1L, Long::sum);
 
                 // Update min/max parcel details.
                 if (mostExpensiveParcel == null || parcel.getPrice() > mostExpensiveParcel.getPrice()) {
@@ -135,6 +140,7 @@ public class ParcelServiceImpl implements ParcelService {
                 .averagePrice(averagePrice)
                 .parcelsCountByStatus(parcelsCountByStatus)
                 .parcelsCountByDeliveryType(parcelsCountByDeliveryType)
+                .parcelsCountByDescription(parcelsCountByDescription)
                 .mostExpensiveParcel(mostExpensiveParcel)
                 .cheapestParcel(cheapestParcel)
                 .heaviestParcel(heaviestParcel)
@@ -173,6 +179,8 @@ public class ParcelServiceImpl implements ParcelService {
         }
 
         parcel.setDeliveryType(actualDeliveryType);
+
+        parcel.setParcelDescription(request.getParcelDescription());
 
         // Find and use the appropriate price calculator from the injected list.
         Optional<PriceCalculator> calculatorOptional = priceCalculators.stream()
