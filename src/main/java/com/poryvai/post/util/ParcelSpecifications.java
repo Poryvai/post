@@ -78,7 +78,7 @@ public class ParcelSpecifications {
 
             // 8. Filter by parcel descriptions
             if (params.getParcelDescriptions() != null && !params.getParcelDescriptions().isEmpty()) {
-                predicates.add(root.get("description").in(params.getParcelDescriptions())); // <-- ДОБАВЬТЕ ЭТОТ БЛОК
+                predicates.add(root.get("parcelDescription").in(params.getParcelDescriptions()));
             }
 
             // Combine all collected predicates with an AND logical operator.
