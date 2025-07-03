@@ -14,6 +14,7 @@ import com.poryvai.post.service.parcel.price.PriceCalculator;
 import com.poryvai.post.util.CommonGenerator;
 import com.poryvai.post.util.ParcelSpecifications;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ParcelServiceImpl implements ParcelService {
 
     private final ParcelRepository parcelRepository;
@@ -50,6 +52,7 @@ public class ParcelServiceImpl implements ParcelService {
      */
     @Override
     public Parcel getByTrackingNumber(String trackingNumber) {
+        log.info("Fetching parcel by tracking number: {}", trackingNumber);
         return parcelRepository.findByTrackingNumber(trackingNumber).orElseThrow(
                 () -> new NotFoundException("Parcel with tracking number " + trackingNumber + " not found"));
     }
@@ -65,6 +68,8 @@ public class ParcelServiceImpl implements ParcelService {
      */
     @Override
     public Page<Parcel> findAll(ParcelSearchParams params, Pageable pageable) {
+        log.info("Fetching all parcels with params: {} and pageable: {}", params, pageable);
+
         // Dynamic search based on provided parameters using JPA Specifications.
         return parcelRepository.findAll(ParcelSpecifications.withDynamicQuery(params), pageable);
     }
@@ -81,6 +86,8 @@ public class ParcelServiceImpl implements ParcelService {
      */
     @Override
     public ParcelStatistic buildStatistic(ParcelSearchParams params) {
+        log.info("Building statistics for parcels with params: {}", params);
+
         // Fetch all parcels matching the dynamic filters for statistics calculation.
         List<Parcel> parcels = parcelRepository.findAll(ParcelSpecifications.withDynamicQuery(params));
 
@@ -161,6 +168,7 @@ public class ParcelServiceImpl implements ParcelService {
      */
     @Override
     public Parcel create(CreateParcelRequest request) {
+        log.info("Creating new parcel for sender: {}, recipient: {}", request.getSender(), request.getRecipient());
         Parcel parcel = new Parcel();
         parcel.setTrackingNumber(generator.uuid());
         parcel.setSender(request.getSender());
@@ -207,6 +215,7 @@ public class ParcelServiceImpl implements ParcelService {
      */
     @Override
     public Parcel updateStatus(String trackingNumber, ParcelStatus status) {
+        log.info("Updating status for parcel with tracking number {} to {}", trackingNumber, status);
         Parcel parcel = getByTrackingNumber(trackingNumber);
         parcel.setStatus(status);
         save(parcel);
@@ -222,6 +231,7 @@ public class ParcelServiceImpl implements ParcelService {
      */
     @Transactional
     public Parcel save(Parcel parcel) {
+        log.info("Saving parcel with tracking number: {}", parcel.getTrackingNumber());
         return parcelRepository.save(parcel);
     }
 
@@ -231,6 +241,7 @@ public class ParcelServiceImpl implements ParcelService {
      * It calls a method on an injected component that has no side effects.
      */
     public void methodForTrick() {
+        log.info("Calling methodForTrick to demonstrate cyclic dependency handling");
         componentForProduceCycleDependency.doNothing();
     }
 }

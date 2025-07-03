@@ -9,6 +9,7 @@ import com.poryvai.post.model.ParcelStatus;
 import com.poryvai.post.service.ParcelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
  * and generating statistics.
  */
 @RestController
-@RequestMapping("/parcels")
+@RequestMapping("/api/v1/parcels")
 @RequiredArgsConstructor
+@Slf4j
 public class ParcelController {
 
     private final ParcelService parcelService;
@@ -42,6 +44,7 @@ public class ParcelController {
      */
     @GetMapping("/{trackingNumber}")
     public Parcel findByTrackingNumber(@PathVariable("trackingNumber") String trackingNumber) {
+        log.info("Received request to find parcel by tracking number: {}", trackingNumber);
         return parcelService.getByTrackingNumber(trackingNumber);
     }
 
@@ -57,6 +60,7 @@ public class ParcelController {
      */
     @GetMapping
     public Page<Parcel> findAll(ParcelSearchParams params, Pageable pageable) {
+        log.info("Received request to find all parcels with params: {} and pageable: {}", params, pageable);
         return parcelService.findAll(params, pageable);
     }
 
@@ -70,6 +74,7 @@ public class ParcelController {
      */
     @GetMapping("/statistic")
     public ParcelStatistic findAll(ParcelSearchParams params) {
+        log.info("Received request to get parcel statistics with params: {}", params);
         return parcelService.buildStatistic(params);
     }
 
@@ -87,6 +92,8 @@ public class ParcelController {
      */
     @PostMapping
     public Parcel create(@Valid @RequestBody CreateParcelRequest request) {
+        log.info("Received request to create parcel for sender: {}, recipient: {}", request.getSender(),
+                request.getRecipient());
         return parcelService.create(request);
     }
 
@@ -104,6 +111,9 @@ public class ParcelController {
     @PatchMapping("/{trackingNumber}")
     public Parcel updateStatus(@PathVariable("trackingNumber") String trackingNumber,
                                @RequestBody UpdateParcelStatusRequest request) {
+        log.info("Received request to update status for parcel with tracking number {} to {}", trackingNumber,
+                request.getStatus());
         return parcelService.updateStatus(trackingNumber, request.getStatus());
     }
+
 }
