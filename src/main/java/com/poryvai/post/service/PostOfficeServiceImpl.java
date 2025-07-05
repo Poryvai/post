@@ -1,0 +1,108 @@
+package com.poryvai.post.service;
+
+import com.poryvai.post.dto.CreatePostOfficeRequest;
+import com.poryvai.post.exception.NotFoundException;
+import com.poryvai.post.model.PostOffice;
+import com.poryvai.post.repository.PostOfficeRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * Service implementation for managing {@link PostOffice} entities.
+ * Provides concrete implementations for basic CRUD operations.
+ */
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class PostOfficeServiceImpl implements PostOfficeService{
+
+    private final PostOfficeRepository postOfficeRepository;
+
+    /**
+     * Creates a new post office based on the provided request.
+     *
+     * @param request The {@link CreatePostOfficeRequest} containing details for the new post office.
+     * @return The newly created and persisted {@link PostOffice} object.
+     */
+    @Override
+    public PostOffice create(CreatePostOfficeRequest request) {
+        log.info("Creating new post office: {}", request.getName());
+        PostOffice postOffice = new PostOffice();
+        postOffice.setName(request.getName());
+        postOffice.setCity(request.getCity());
+        postOffice.setPostcode(request.getPostcode());
+        postOffice.setStreet(request.getStreet());
+        return postOfficeRepository.save(postOffice);
+    }
+
+    /**
+     * Retrieves a post office by its unique ID.
+     *
+     * @param id The unique ID of the post office.
+     * @return The {@link PostOffice} object corresponding to the given ID.
+     * @throws NotFoundException if no post office with the specified ID is found.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public PostOffice getById(Long id) {
+        log.info("Fetching post office by ID: {}", id);
+        return postOfficeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Post Office with ID " + id + " not found"));
+    }
+
+    /**
+     * Retrieves all post offices.
+     *
+     * @return A list of all {@link PostOffice} objects.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<PostOffice> getAll() {
+        log.info("Fetching all post offices");
+        return postOfficeRepository.findAll();
+    }
+
+    /**
+     * Updates an existing post office identified by its ID.
+     *
+     * @param id      The unique ID of the post office to be updated.
+     * @param request The {@link CreatePostOfficeRequest}
+     *                containing the updated details.
+     * @return The updated {@link PostOffice} object.
+     * @throws NotFoundException if no post office with the specified ID is found.
+     */
+    @Override
+    @Transactional
+    public PostOffice update(Long id, CreatePostOfficeRequest request) {
+        log.info("Updating post office with ID {}: {}", id, request.getName());
+        return postOfficeRepository.findById(id)
+                .map(existingPostOffice -> {
+                    existingPostOffice.setName(request.getName());
+                    existingPostOffice.setCity(request.getCity());
+                    existingPostOffice.setPostcode(request.getPostcode());
+                    existingPostOffice.setStreet(request.getStreet());
+                    return postOfficeRepository.save(existingPostOffice);
+                })
+                .orElseThrow(() -> new NotFoundException("Post Office with ID " + id + " not found"));
+    }
+
+    /**
+     * Deletes a post office by its unique ID.
+     *
+     * @param id The unique ID of the post office to be deleted.
+     * @throws NotFoundException if no post office with the specified ID is found.
+     */
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        log.info("Deleting post office by ID: {}", id);
+        if (!postOfficeRepository.existsById(id)) {
+            throw new NotFoundException("Post Office with ID " + id + " not found");
+        }
+        postOfficeRepository.deleteById(id);
+    }
+}
