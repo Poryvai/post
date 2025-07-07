@@ -1,11 +1,14 @@
 package com.poryvai.post.controller;
 
 import com.poryvai.post.dto.CreatePostOfficeRequest;
+import com.poryvai.post.dto.PostOfficeSearchParams;
 import com.poryvai.post.model.PostOffice;
 import com.poryvai.post.service.PostOfficeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,14 +52,18 @@ public class PostOfficeController {
     }
 
     /**
-     * Retrieves all post offices.
+     * Retrieves a paginated list of post offices, allowing for dynamic filtering based on various criteria.
      *
-     * @return A list of all {@link PostOffice} objects. HTTP status 200 OK.
+     * @param params   {@link PostOfficeSearchParams} containing optional filters such as name, city, postcode, and street.
+     * These parameters are typically passed as request parameters (query string).
+     * @param pageable {@link Pageable} object for pagination and sorting (e.g., page=0&size=10&sort=id,asc).
+     * Automatically resolved by Spring from request parameters.
+     * @return A {@link Page} of {@link PostOffice} objects matching the search criteria.
      */
     @GetMapping
-    List<PostOffice> getAll(){
-        log.info("Received request to get all post offices");
-        return postOfficeService.getAll();
+    public Page<PostOffice> findAll(PostOfficeSearchParams params, Pageable pageable) {
+        log.info("Received request to find all post offices with params: {} and pageable: {}", params, pageable);
+        return postOfficeService.findAll(params, pageable);
     }
 
     /**
@@ -84,4 +91,6 @@ public class PostOfficeController {
         log.info("Received request to delete post office by ID: {}", id);
         postOfficeService.delete(id);
     }
+
+
 }
