@@ -1,7 +1,10 @@
 package com.poryvai.post.service;
 
 import com.poryvai.post.dto.CreatePostOfficeRequest;
+import com.poryvai.post.dto.PostOfficeSearchParams;
 import com.poryvai.post.model.PostOffice;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -53,4 +56,13 @@ public interface PostOfficeService {
      * @throws com.poryvai.post.exception.NotFoundException if no post office with the specified ID is found.
      */
     void delete(Long id);
+
+    /**
+     * Retrieves a paginated list of PostOffice entities based on dynamic search parameters.
+     *
+     * @param params   {@link PostOfficeSearchParams} containing optional filters for post offices.
+     * @param pageable {@link Pageable} object for pagination and sorting.
+     * @return A {@link Page} of {@link PostOffice} objects matching the search criteria.
+     */
+    Page<PostOffice> findAll(PostOfficeSearchParams params, Pageable pageable);
 }
