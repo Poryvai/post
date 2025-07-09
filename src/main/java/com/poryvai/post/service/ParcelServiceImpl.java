@@ -5,11 +5,9 @@ import com.poryvai.post.dto.CreateParcelRequest;
 import com.poryvai.post.dto.ParcelSearchParams;
 import com.poryvai.post.dto.ParcelStatistic;
 import com.poryvai.post.exception.NotFoundException;
-import com.poryvai.post.model.DeliveryType;
-import com.poryvai.post.model.Parcel;
-import com.poryvai.post.model.ParcelDescription;
-import com.poryvai.post.model.ParcelStatus;
+import com.poryvai.post.model.*;
 import com.poryvai.post.repository.ParcelRepository;
+import com.poryvai.post.repository.PostOfficeRepository;
 import com.poryvai.post.service.parcel.price.PriceCalculator;
 import com.poryvai.post.util.CommonGenerator;
 import com.poryvai.post.util.ParcelSpecifications;
@@ -39,6 +37,7 @@ import java.util.stream.Collectors;
 public class ParcelServiceImpl implements ParcelService {
 
     private final ParcelRepository parcelRepository;
+    private final PostOfficeRepository postOfficeRepository;
     private final CommonGenerator generator;
     private final List<PriceCalculator> priceCalculators; // Injected list of price calculation strategies
     private final ComponentForProduceCycleDependency componentForProduceCycleDependency;
@@ -167,14 +166,25 @@ public class ParcelServiceImpl implements ParcelService {
      * price calculator is found.
      */
     @Override
+    @Transactional
     public Parcel create(CreateParcelRequest request) {
-        log.info("Creating new parcel for sender: {}, recipient: {}", request.getSender(), request.getRecipient());
+        log.info("Creating new parcel for sender: {}, recipient: {} from PostOffice ID {} to PostOffice ID {}",
+                request.getSender(), request.getRecipient(), request.getOriginPostOfficeId(), request.getDestinationPostOfficeId());
+
+        PostOffice originPostOffice = postOfficeRepository.findById(request.getOriginPostOfficeId())
+                .orElseThrow(() -> new NotFoundException("Origin Post Office with ID " + request.getOriginPostOfficeId() + " not found"));
+
+        PostOffice destinationPostOffice = postOfficeRepository.findById(request.getDestinationPostOfficeId())
+                .orElseThrow(() -> new NotFoundException("Destination Post Office with ID " + request.getDestinationPostOfficeId() + " not found"));
+
         Parcel parcel = new Parcel();
         parcel.setTrackingNumber(generator.uuid());
         parcel.setSender(request.getSender());
         parcel.setRecipient(request.getRecipient());
         parcel.setWeight(request.getWeight());
         parcel.setStatus(ParcelStatus.CREATED);
+        parcel.setOriginPostOffice(originPostOffice);
+        parcel.setDestinationPostOffice(destinationPostOffice);
 
         // Logic to determine the actual DeliveryType, defaulting to DEFAULT if null.
         DeliveryType initialDeliveryType = request.getDeliveryType();
