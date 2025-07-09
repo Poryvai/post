@@ -81,19 +81,24 @@ public class ParcelController {
     /**
      * Creates a new parcel record in the system.
      * The parcel's tracking number will be automatically generated, and its price calculated
-     * based on the provided weight and delivery type.
+     * based on the provided weight and delivery type. The parcel will be associated with
+     * the specified origin and destination post offices.
      *
      * @param request The {@link CreateParcelRequest} object containing details for the new parcel.
      * This object is expected in the request body (JSON).
      * It should be valid according to its validation annotations (e.g., @NotBlank, @Positive).
      * @return The created {@link Parcel} object, including its generated tracking number and calculated price.
      * This method relies on {@link com.poryvai.post.controller.RestExceptionHandler}
-     * to handle validation errors (HTTP 400).
+     * to handle validation errors (HTTP 400) or {@link com.poryvai.post.exception.NotFoundException}
+     * if the specified post offices do not exist.
      */
     @PostMapping
     public Parcel create(@Valid @RequestBody CreateParcelRequest request) {
-        log.info("Received request to create parcel for sender: {}, recipient: {}", request.getSender(),
-                request.getRecipient());
+        log.info("Received request to create parcel for sender: {}, recipient: {} from origin PostOffice ID: {}, to destination PostOffice ID: {}",
+                request.getSender(),
+                request.getRecipient(),
+                request.getOriginPostOfficeId(),
+                request.getDestinationPostOfficeId());
         return parcelService.create(request);
     }
 

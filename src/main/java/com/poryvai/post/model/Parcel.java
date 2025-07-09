@@ -37,13 +37,13 @@ public class Parcel {
     /**
      * The name or identifier of the parcel's sender.
      */
-    @Column(name = "sender", nullable = false)
+    @Column(name = "sender", nullable = false, length = 128)
     private String sender;
 
     /**
      * The name or identifier of the parcel's recipient.
      */
-    @Column(name = "recipient", nullable = false)
+    @Column(name = "recipient", nullable = false, length = 128)
     private String recipient;
 
     /**
@@ -81,4 +81,18 @@ public class Parcel {
     @Enumerated(EnumType.STRING)
     @Column(name = "description", nullable = false, length = 20)
     private ParcelDescription parcelDescription;
+
+    /**
+     * The origin post office from which the parcel was sent.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origin_post_office_id", nullable = false)
+    private PostOffice originPostOffice;
+
+    /**
+     * The destination post office where the parcel is intended to be delivered.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_post_office_id", nullable = false)
+    private PostOffice destinationPostOffice;
 }
