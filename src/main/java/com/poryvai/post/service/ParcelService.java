@@ -1,6 +1,7 @@
 package com.poryvai.post.service;
 
 import com.poryvai.post.dto.CreateParcelRequest;
+import com.poryvai.post.dto.ParcelResponse;
 import com.poryvai.post.model.Parcel;
 import com.poryvai.post.dto.ParcelSearchParams;
 import com.poryvai.post.dto.ParcelStatistic;
@@ -19,11 +20,11 @@ public interface ParcelService {
      * Retrieves a parcel by its unique tracking number.
      *
      * @param trackingNumber The unique tracking number used to identify the parcel.
-     * @return The {@link Parcel} object corresponding to the given tracking number.
+     * @return The {@link ParcelResponse}  DTO corresponding to the given tracking number.
      * @throws com.poryvai.post.exception.NotFoundException if no parcel with the specified tracking number is found.
      * This exception is typically handled by a global exception handler (e.g., RestExceptionHandler).
      */
-    Parcel getByTrackingNumber(String trackingNumber);
+    ParcelResponse getByTrackingNumber(String trackingNumber);
 
     /**
      * Retrieves a paginated and filtered list of parcels.
@@ -31,9 +32,9 @@ public interface ParcelService {
      *
      * @param params   An object containing optional search criteria (e.g., sender, recipient, status, parcel descriptions).
      * @param pageable An object defining pagination (page number, size) and sorting options.
-     * @return A {@link Page} of {@link Parcel} objects that match the criteria.
+     * @return A {@link Page} of {@link ParcelResponse} DTOs that match the specified criteria.
      */
-    Page<Parcel> findAll(ParcelSearchParams params, Pageable pageable);
+    Page< ParcelResponse> findAll(ParcelSearchParams params, Pageable pageable);
 
     /**
      * Builds and returns a statistical summary of parcels based on specified search parameters.
@@ -62,9 +63,9 @@ public interface ParcelService {
      *
      * @param trackingNumber The unique tracking number of the parcel to be updated.
      * @param status         The new {@link ParcelStatus} to set for the parcel.
-     * @return The updated {@link Parcel} object.
+     * @return The updated {@link ParcelResponse} DTO representing the parcel after the status change.
      * @throws com.poryvai.post.exception.NotFoundException if no parcel with the specified tracking number is found.
      * This exception is typically handled by a global exception handler (e.g., RestExceptionHandler).
      */
-    Parcel updateStatus(String trackingNumber, ParcelStatus status);
+    ParcelResponse updateStatus(String trackingNumber, ParcelStatus status);
 }

@@ -1,9 +1,7 @@
 package com.poryvai.post.service;
 
 import com.poryvai.post.common.ComponentForProduceCycleDependency;
-import com.poryvai.post.dto.CreateParcelRequest;
-import com.poryvai.post.dto.ParcelSearchParams;
-import com.poryvai.post.dto.ParcelStatistic;
+import com.poryvai.post.dto.*;
 import com.poryvai.post.exception.NotFoundException;
 import com.poryvai.post.model.*;
 import com.poryvai.post.repository.ParcelRepository;
@@ -46,14 +44,17 @@ public class ParcelServiceImpl implements ParcelService {
      * Retrieves a parcel by its unique tracking number.
      *
      * @param trackingNumber The unique tracking number (String representation) used to identify the parcel.
-     * @return The {@link Parcel} object corresponding to the given tracking number.
+     * @return The {@link ParcelResponse} object corresponding to the given tracking number.
      * @throws NotFoundException if no parcel with the specified tracking number is found.
      */
     @Override
-    public Parcel getByTrackingNumber(String trackingNumber) {
-        log.info("Fetching parcel by tracking number: {}", trackingNumber);
-        return parcelRepository.findByTrackingNumber(trackingNumber).orElseThrow(
-                () -> new NotFoundException("Parcel with tracking number " + trackingNumber + " not found"));
+    @Transactional(readOnly = true)
+    public ParcelResponse getByTrackingNumber(String trackingNumber) {
+        log.info("Retrieving parcel by tracking number: {}", trackingNumber);
+        Parcel parcel = parcelRepository.findByTrackingNumber(trackingNumber)
+                .orElseThrow(() -> new NotFoundException("Parcel with tracking number " + trackingNumber + " not found"));
+
+        return mapParcelToResponse(parcel);
     }
 
     /**
@@ -63,14 +64,15 @@ public class ParcelServiceImpl implements ParcelService {
      *
      * @param params   An object containing optional search criteria (e.g., sender, recipient, status, weight/price ranges).
      * @param pageable An object defining pagination (page number, size) and sorting options.
-     * @return A {@link Page} of {@link Parcel} objects that match the specified criteria.
+     * @return A {@link Page} of {@link ParcelResponse} objects that match the specified criteria.
      */
     @Override
-    public Page<Parcel> findAll(ParcelSearchParams params, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<ParcelResponse> findAll(ParcelSearchParams params, Pageable pageable) {
         log.info("Fetching all parcels with params: {} and pageable: {}", params, pageable);
+        Page<Parcel> parcelPage = parcelRepository.findAll(ParcelSpecifications.withDynamicQuery(params), pageable); // Название метода уже исправлено
 
-        // Dynamic search based on provided parameters using JPA Specifications.
-        return parcelRepository.findAll(ParcelSpecifications.withDynamicQuery(params), pageable);
+        return parcelPage.map(this::mapParcelToResponse);
     }
 
     /**
@@ -84,6 +86,7 @@ public class ParcelServiceImpl implements ParcelService {
      * @return A {@link ParcelStatistic} object containing the aggregated statistical data.
      */
     @Override
+    @Transactional(readOnly = true)
     public ParcelStatistic buildStatistic(ParcelSearchParams params) {
         log.info("Building statistics for parcels with params: {}", params);
 
@@ -220,16 +223,21 @@ public class ParcelServiceImpl implements ParcelService {
      *
      * @param trackingNumber The unique tracking number of the parcel to be updated.
      * @param status         The new {@link ParcelStatus} to set for the parcel.
-     * @return The updated {@link Parcel} object, re-fetched from the database.
+     * @return The updated {@link ParcelResponse} object, representing the fetched from the database.
      * @throws NotFoundException if no parcel with the specified tracking number is found.
      */
     @Override
-    public Parcel updateStatus(String trackingNumber, ParcelStatus status) {
+    @Transactional
+    public ParcelResponse updateStatus(String trackingNumber, ParcelStatus status) {
         log.info("Updating status for parcel with tracking number {} to {}", trackingNumber, status);
-        Parcel parcel = getByTrackingNumber(trackingNumber);
+        Parcel parcel = parcelRepository.findByTrackingNumber(trackingNumber)
+                .orElseThrow(() -> new NotFoundException("Parcel with tracking number " + trackingNumber + " not found"));
+
         parcel.setStatus(status);
-        save(parcel);
-        return getByTrackingNumber(trackingNumber);
+
+        Parcel updatedParcel = parcelRepository.save(parcel);
+
+        return mapParcelToResponse(updatedParcel);
     }
 
     /**
@@ -253,5 +261,39 @@ public class ParcelServiceImpl implements ParcelService {
     public void methodForTrick() {
         log.info("Calling methodForTrick to demonstrate cyclic dependency handling");
         componentForProduceCycleDependency.doNothing();
+    }
+
+    /**
+     * Helper method to map a Parcel entity to a ParcelResponse DTO.
+     *
+     * @param parcel The Parcel entity to map.
+     * @return A ParcelResponse DTO.
+     */
+    private ParcelResponse mapParcelToResponse(Parcel parcel) {
+        return ParcelResponse.builder()
+                .id(parcel.getId())
+                .trackingNumber(parcel.getTrackingNumber())
+                .sender(parcel.getSender())
+                .recipient(parcel.getRecipient())
+                .weight(parcel.getWeight())
+                .price(parcel.getPrice())
+                .status(parcel.getStatus())
+                .deliveryType(parcel.getDeliveryType())
+                .parcelDescription(parcel.getParcelDescription())
+                .originPostOffice(parcel.getOriginPostOffice() != null ? PostOfficeDto.builder()
+                        .id(parcel.getOriginPostOffice().getId())
+                        .name(parcel.getOriginPostOffice().getName())
+                        .city(parcel.getOriginPostOffice().getCity())
+                        .postcode(parcel.getOriginPostOffice().getPostcode())
+                        .street(parcel.getOriginPostOffice().getStreet())
+                        .build() : null)
+                .destinationPostOffice(parcel.getDestinationPostOffice() != null ? PostOfficeDto.builder()
+                        .id(parcel.getDestinationPostOffice().getId())
+                        .name(parcel.getDestinationPostOffice().getName())
+                        .city(parcel.getDestinationPostOffice().getCity())
+                        .postcode(parcel.getDestinationPostOffice().getPostcode())
+                        .street(parcel.getDestinationPostOffice().getStreet())
+                        .build() : null)
+                .build();
     }
 }
