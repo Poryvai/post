@@ -1,9 +1,6 @@
 package com.poryvai.post.controller;
 
-import com.poryvai.post.dto.CreateParcelRequest;
-import com.poryvai.post.dto.ParcelSearchParams;
-import com.poryvai.post.dto.ParcelStatistic;
-import com.poryvai.post.dto.UpdateParcelStatusRequest;
+import com.poryvai.post.dto.*;
 import com.poryvai.post.model.Parcel;
 import com.poryvai.post.model.ParcelStatus;
 import com.poryvai.post.service.ParcelService;
@@ -37,13 +34,13 @@ public class ParcelController {
      * Retrieves a parcel by its unique tracking number.
      *
      * @param trackingNumber The unique tracking number of the parcel, extracted from the URL path.
-     * @return The {@link Parcel} object matching the tracking number.
+     * @return The {@link ParcelResponse} DTO matching the tracking number.
      * This method relies on {@link com.poryvai.post.controller.RestExceptionHandler}
      * to handle {@link com.poryvai.post.exception.NotFoundException}
      * if no parcel is found, returning an HTTP 404.
      */
     @GetMapping("/{trackingNumber}")
-    public Parcel findByTrackingNumber(@PathVariable("trackingNumber") String trackingNumber) {
+    public ParcelResponse findByTrackingNumber(@PathVariable("trackingNumber") String trackingNumber) {
         log.info("Received request to find parcel by tracking number: {}", trackingNumber);
         return parcelService.getByTrackingNumber(trackingNumber);
     }
@@ -56,10 +53,10 @@ public class ParcelController {
      * These parameters are typically passed as request parameters (query string).
      * @param pageable {@link Pageable} object for pagination and sorting (e.g., page=0&size=10&sort=id,asc).
      * Automatically resolved by Spring from request parameters.
-     * @return A {@link Page} of {@link Parcel} objects matching the search criteria.
+     * @return A {@link Page} of {@link ParcelResponse} DTOs matching the search criteria.
      */
     @GetMapping
-    public Page<Parcel> findAll(ParcelSearchParams params, Pageable pageable) {
+    public Page<ParcelResponse> findAll(ParcelSearchParams params, Pageable pageable) {
         log.info("Received request to find all parcels with params: {} and pageable: {}", params, pageable);
         return parcelService.findAll(params, pageable);
     }
@@ -108,14 +105,14 @@ public class ParcelController {
      * @param trackingNumber The unique tracking number of the parcel to update, extracted from the URL path.
      * @param request        The {@link UpdateParcelStatusRequest} object containing the new {@link ParcelStatus}.
      * This object is expected in the request body (JSON).
-     * @return The updated {@link Parcel} object with its new status.
+     * @return The updated {@link ParcelResponse} DTO with its new status.
      * This method relies on {@link com.poryvai.post.controller.RestExceptionHandler}
      * to handle {@link com.poryvai.post.exception.NotFoundException}
      * if no parcel is found, returning an HTTP 404.
      */
     @PatchMapping("/{trackingNumber}")
-    public Parcel updateStatus(@PathVariable("trackingNumber") String trackingNumber,
-                               @RequestBody UpdateParcelStatusRequest request) {
+    public ParcelResponse updateStatus(@PathVariable("trackingNumber") String trackingNumber,
+                                       @RequestBody UpdateParcelStatusRequest request) {
         log.info("Received request to update status for parcel with tracking number {} to {}", trackingNumber,
                 request.getStatus());
         return parcelService.updateStatus(trackingNumber, request.getStatus());
