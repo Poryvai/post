@@ -29,8 +29,9 @@ public class ClientServiceImpl implements ClientService{
      * @return The newly created and persisted {@link Client} object.
      */
     @Override
+    @Transactional
     public Client create(CreateClientRequest request) {
-        log.info("Creating new client: {} {}", request.getFirstName(), request.getLastName());
+        log.info("Creating new client with first name: {}, last name: {}", request.getFirstName(), request.getLastName());
         Client client = new Client();
         client.setFirstName(request.getFirstName());
         client.setLastName(request.getLastName());
@@ -84,6 +85,8 @@ public class ClientServiceImpl implements ClientService{
                     existingClient.setLastName(request.getLastName());
                     existingClient.setEmail(request.getEmail());
                     existingClient.setPhone(request.getPhone());
+
+                    log.info("Client with ID: {} updated successfully.", id);
                     return clientRepository.save(existingClient);
                 })
                 .orElseThrow(() -> new NotFoundException("Client with ID " + id + " not found for update"));
@@ -102,5 +105,6 @@ public class ClientServiceImpl implements ClientService{
             throw new NotFoundException("Client with ID " + id + " not found");
         }
         clientRepository.deleteById(id);
+        log.info("Client with ID: {} deleted successfully.", id);
     }
 }
