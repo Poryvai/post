@@ -180,41 +180,35 @@ public class ParcelServiceImpl implements ParcelService {
         PostOffice destinationPostOffice = postOfficeRepository.findById(request.getDestinationPostOfficeId())
                 .orElseThrow(() -> new NotFoundException("Destination Post Office with ID " + request.getDestinationPostOfficeId() + " not found"));
 
-        Parcel parcel = new Parcel();
-        parcel.setTrackingNumber(generator.uuid());
-        parcel.setSender(request.getSender());
-        parcel.setRecipient(request.getRecipient());
-        parcel.setWeight(request.getWeight());
-        parcel.setStatus(ParcelStatus.CREATED);
-        parcel.setOriginPostOffice(originPostOffice);
-        parcel.setDestinationPostOffice(destinationPostOffice);
-
         // Logic to determine the actual DeliveryType, defaulting to DEFAULT if null.
         DeliveryType initialDeliveryType = request.getDeliveryType();
-        final DeliveryType actualDeliveryType;
-
-        if (initialDeliveryType == null) {
-            actualDeliveryType = DeliveryType.DEFAULT;
-        } else {
-            actualDeliveryType = initialDeliveryType;
-        }
-
-        parcel.setDeliveryType(actualDeliveryType);
-
-        parcel.setParcelDescription(request.getParcelDescription());
+        final DeliveryType actualDeliveryType = Optional.ofNullable(initialDeliveryType)
+                .orElse(DeliveryType.DEFAULT);
 
         // Find and use the appropriate price calculator from the injected list.
-        Optional<PriceCalculator> calculatorOptional = priceCalculators.stream()
+        PriceCalculator calculator = priceCalculators.stream()
                 .filter(c -> c.getDeliveryType() == actualDeliveryType)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("No price calculator found for delivery type: " + actualDeliveryType));
 
-        // Calculate and set the parcel price using the selected calculator
-        if (calculatorOptional.isPresent()) {
-            parcel.setPrice(calculatorOptional.get().calculatePrice(request));
-        } else {
-            throw new NotFoundException("No price calculator found for delivery type: " + actualDeliveryType);
-        }
-        return parcelRepository.save(parcel);
+
+
+        Parcel parcel = Parcel.builder()
+                .trackingNumber(generator.uuid())
+                .sender(request.getSender())
+                .recipient(request.getRecipient())
+                .weight(request.getWeight())
+                .status(ParcelStatus.CREATED)
+                .originPostOffice(originPostOffice)
+                .destinationPostOffice(destinationPostOffice)
+                .deliveryType(actualDeliveryType) // Уже определено выше
+                .parcelDescription(request.getParcelDescription())
+                .price(calculator.calculatePrice(request)) // Цена теперь вычисляется один раз
+                .build();
+
+        Parcel savedParcel = parcelRepository.save(parcel);
+        log.info("Parcel created successfully with tracking number: {}", savedParcel.getTrackingNumber());
+        return savedParcel;
     }
 
     /**

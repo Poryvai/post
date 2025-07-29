@@ -32,12 +32,16 @@ public class ClientServiceImpl implements ClientService{
     @Transactional
     public Client create(CreateClientRequest request) {
         log.info("Creating new client with first name: {}, last name: {}", request.getFirstName(), request.getLastName());
-        Client client = new Client();
-        client.setFirstName(request.getFirstName());
-        client.setLastName(request.getLastName());
-        client.setEmail(request.getEmail());
-        client.setPhone(request.getPhone());
-        return clientRepository.save(client);
+        Client client = Client.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .phone(request.getPhone())
+                .build();
+
+        Client savedClient = clientRepository.save(client);
+        log.info("Client created successfully with ID: {}", savedClient.getId());
+        return savedClient;
     }
 
     /**

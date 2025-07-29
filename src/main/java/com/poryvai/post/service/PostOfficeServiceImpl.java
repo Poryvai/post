@@ -33,14 +33,19 @@ public class PostOfficeServiceImpl implements PostOfficeService{
      * @return The newly created and persisted {@link PostOffice} object.
      */
     @Override
+    @Transactional
     public PostOffice create(CreatePostOfficeRequest request) {
         log.info("Creating new post office: {}", request.getName());
-        PostOffice postOffice = new PostOffice();
-        postOffice.setName(request.getName());
-        postOffice.setCity(request.getCity());
-        postOffice.setPostcode(request.getPostcode());
-        postOffice.setStreet(request.getStreet());
-        return postOfficeRepository.save(postOffice);
+        PostOffice postOffice = PostOffice.builder()
+                .name(request.getName())
+                .city(request.getCity())
+                .postcode(request.getPostcode())
+                .street(request.getStreet())
+                .build();
+
+        PostOffice savedPostOffice = postOfficeRepository.save(postOffice);
+        log.info("Post office created successfully with ID: {}", savedPostOffice.getId());
+        return savedPostOffice;
     }
 
     /**
