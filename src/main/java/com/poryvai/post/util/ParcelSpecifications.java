@@ -1,9 +1,11 @@
 package com.poryvai.post.util;
 
 import com.poryvai.post.dto.ParcelSearchParams;
+import com.poryvai.post.model.Client;
 import com.poryvai.post.model.DeliveryType;
 import com.poryvai.post.model.Parcel;
 import com.poryvai.post.model.ParcelStatus;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -40,14 +42,16 @@ public class ParcelSpecifications {
                 predicates.add(criteriaBuilder.equal(root.get("trackingNumber"), params.getTrackingNumber()));
             }
 
-            // 2. Filter by sender
-            if (params.getSender() != null && !params.getSender().isEmpty()) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("sender")), "%" + params.getSender().toLowerCase() + "%"));
+            // 2. Filter by senderClient
+            if (params.getSenderClientId() != null) {
+                Join<Parcel, Client> senderJoin = root.join("senderClient");
+                predicates.add(criteriaBuilder.equal(senderJoin.get("id"), params.getSenderClientId()));
             }
 
-            // 3.Filter by recipient
-            if (params.getRecipient() != null && !params.getRecipient().isEmpty()) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("recipient")), "%" + params.getRecipient().toLowerCase() + "%"));
+            // 3.Filter by recipientClient
+            if (params.getRecipientClientId() != null) {
+                Join<Parcel, Client> recipientJoin = root.join("recipientClient");
+                predicates.add(criteriaBuilder.equal(recipientJoin.get("id"), params.getRecipientClientId()));
             }
 
             // 4. Filter by weight (fromWeight, toWeight)
@@ -76,9 +80,19 @@ public class ParcelSpecifications {
                 predicates.add(root.get("deliveryType").in(params.getDeliveryTypes()));
             }
 
-            // 8. Filter by parcel descriptions
+            // 8. Filter by parcelDescriptions
             if (params.getParcelDescriptions() != null && !params.getParcelDescriptions().isEmpty()) {
                 predicates.add(root.get("parcelDescription").in(params.getParcelDescriptions()));
+            }
+
+            // 9. Filter by originPostOffice
+            if (params.getOriginPostOfficeId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("originPostOffice").get("id"), params.getOriginPostOfficeId()));
+            }
+
+            // 10. Filter by destinationPostOffice
+            if (params.getDestinationPostOfficeId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("destinationPostOffice").get("id"), params.getDestinationPostOfficeId()));
             }
 
             // Combine all collected predicates with an AND logical operator.

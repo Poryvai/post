@@ -19,8 +19,8 @@ import lombok.NoArgsConstructor;
 public class ParcelResponse {
     private Long id;
     private String trackingNumber;
-    private String sender;
-    private String recipient;
+    private ClientDto senderClient;
+    private ClientDto recipientClient;
     private Double weight;
     private Double price;
     private ParcelStatus status;

@@ -35,16 +35,21 @@ public class Parcel {
     private String trackingNumber;
 
     /**
-     * The name or identifier of the parcel's sender.
+     * The {@link Client} entity representing the sender of the parcel.
+     * This field establishes a many-to-one relationship with the Client entity.
      */
-    @Column(name = "sender", nullable = false, length = 128)
-    private String sender;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_sender_id", nullable = false)
+    private Client senderClient;
+
 
     /**
-     * The name or identifier of the parcel's recipient.
+     * The {@link Client} entity representing the recipient of the parcel.
+     * This field establishes a many-to-one relationship with the Client entity.
      */
-    @Column(name = "recipient", nullable = false, length = 128)
-    private String recipient;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_recipient_id", nullable = false)
+    private Client recipientClient;
 
     /**
      * The weight of the parcel in kilograms.
@@ -83,14 +88,18 @@ public class Parcel {
     private ParcelDescription parcelDescription;
 
     /**
-     * The origin post office from which the parcel was sent.
+     * The {@link PostOffice} entity representing the origin post office
+     * from which the parcel was sent.
+     * This field establishes a many-to-one relationship with the PostOffice entity.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_post_office_id", nullable = false)
     private PostOffice originPostOffice;
 
     /**
-     * The destination post office where the parcel is intended to be delivered.
+     * The {@link PostOffice} entity representing the destination post office
+     * where the parcel is intended to be delivered.
+     * This field establishes a many-to-one relationship with the PostOffice entity.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "destination_post_office_id", nullable = false)

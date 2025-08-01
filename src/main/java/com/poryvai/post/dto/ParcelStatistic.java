@@ -57,23 +57,23 @@ public class ParcelStatistic {
      * The parcel with the highest price among those matching the search criteria.
      * Can be null if no parcels are found.
      */
-    private Parcel mostExpensiveParcel;
+    private ParcelResponse mostExpensiveParcel;
 
     /**
      * The parcel with the lowest price among those matching the search criteria.
      * Can be null if no parcels are found.
      */
-    private Parcel cheapestParcel;
+    private ParcelResponse cheapestParcel;
 
     /**
      * The parcel with the highest weight among those matching the search criteria.
      * Can be null if no parcels are found.
      */
-    private Parcel heaviestParcel;
+    private ParcelResponse heaviestParcel;
 
     /**
      * The parcel with the lowest weight among those matching the search criteria.
      * Can be null if no parcels are found.
      */
-    private Parcel lightestParcel;
+    private ParcelResponse lightestParcel;
 }

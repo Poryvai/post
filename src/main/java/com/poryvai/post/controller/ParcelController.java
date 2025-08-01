@@ -92,8 +92,8 @@ public class ParcelController {
     @PostMapping
     public Parcel create(@Valid @RequestBody CreateParcelRequest request) {
         log.info("Received request to create parcel for sender: {}, recipient: {} from origin PostOffice ID: {}, to destination PostOffice ID: {}",
-                request.getSender(),
-                request.getRecipient(),
+                request.getSenderClientId(),
+                request.getRecipientClientId(),
                 request.getOriginPostOfficeId(),
                 request.getDestinationPostOfficeId());
         return parcelService.create(request);

@@ -1,8 +1,10 @@
 package com.poryvai.post.dto;
 
+import com.poryvai.post.model.Client;
 import com.poryvai.post.model.DeliveryType;
 import com.poryvai.post.model.ParcelDescription;
 import com.poryvai.post.model.ParcelStatus;
+import com.poryvai.post.model.PostOffice;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,14 +29,14 @@ public class ParcelSearchParams {
     private String trackingNumber;
 
     /**
-     * A partial or full sender name for case-insensitive search.
+     * The ID of the sender {@link Client} to filter by.
      */
-    private String sender;
+    private Long senderClientId;;
 
     /**
-     * A partial or full recipient name for case-insensitive search.
+     * The ID of the recipient {@link Client} to filter by.
      */
-    private String recipient;
+    private Long recipientClientId;
 
     /**
      * Minimum weight of the parcel to filter by (inclusive).
@@ -76,4 +78,14 @@ public class ParcelSearchParams {
      */
     @Builder.Default
     private List<ParcelDescription> parcelDescriptions = new ArrayList<>();
+
+    /**
+     * The ID of the origin {@link PostOffice} to filter by.
+     */
+    private Long originPostOfficeId;
+
+    /**
+     * The ID of the destination {@link PostOffice} to filter by.
+     */
+    private Long destinationPostOfficeId;
 }
