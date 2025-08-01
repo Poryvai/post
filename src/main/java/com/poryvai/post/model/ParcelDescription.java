@@ -31,6 +31,11 @@ public enum ParcelDescription {
      * The parcel primarily contains large or small appliances for home use.
      */
     HOME_APPLIANCES,
+
+    /**
+     * The parcel primarily contains documents.
+     */
+    DOCUMENTS,
     /**
      * The parcel contains miscellaneous items not covered by other specific categories.
      */

@@ -4,6 +4,7 @@ import com.poryvai.post.common.ComponentForProduceCycleDependency;
 import com.poryvai.post.dto.*;
 import com.poryvai.post.exception.NotFoundException;
 import com.poryvai.post.model.*;
+import com.poryvai.post.repository.ClientRepository;
 import com.poryvai.post.repository.ParcelRepository;
 import com.poryvai.post.repository.PostOfficeRepository;
 import com.poryvai.post.service.parcel.price.PriceCalculator;
@@ -39,6 +40,7 @@ public class ParcelServiceImpl implements ParcelService {
     private final CommonGenerator generator;
     private final List<PriceCalculator> priceCalculators; // Injected list of price calculation strategies
     private final ComponentForProduceCycleDependency componentForProduceCycleDependency;
+    private final ClientRepository clientRepository;
 
     /**
      * Retrieves a parcel by its unique tracking number.
@@ -70,7 +72,7 @@ public class ParcelServiceImpl implements ParcelService {
     @Transactional(readOnly = true)
     public Page<ParcelResponse> findAll(ParcelSearchParams params, Pageable pageable) {
         log.info("Fetching all parcels with params: {} and pageable: {}", params, pageable);
-        Page<Parcel> parcelPage = parcelRepository.findAll(ParcelSpecifications.withDynamicQuery(params), pageable); // Название метода уже исправлено
+        Page<Parcel> parcelPage = parcelRepository.findAll(ParcelSpecifications.withDynamicQuery(params), pageable);
 
         return parcelPage.map(this::mapParcelToResponse);
     }
@@ -150,10 +152,10 @@ public class ParcelServiceImpl implements ParcelService {
                 .parcelsCountByStatus(parcelsCountByStatus)
                 .parcelsCountByDeliveryType(parcelsCountByDeliveryType)
                 .parcelsCountByDescription(parcelsCountByDescription)
-                .mostExpensiveParcel(mostExpensiveParcel)
-                .cheapestParcel(cheapestParcel)
-                .heaviestParcel(heaviestParcel)
-                .lightestParcel(lightestParcel)
+                .mostExpensiveParcel(mostExpensiveParcel != null ? mapParcelToResponse(mostExpensiveParcel) : null)
+                .cheapestParcel(cheapestParcel != null ? mapParcelToResponse(cheapestParcel) : null)
+                .heaviestParcel(heaviestParcel != null ? mapParcelToResponse(heaviestParcel) : null)
+                .lightestParcel(lightestParcel != null ? mapParcelToResponse(lightestParcel) : null)
                 .build();
     }
 
@@ -172,13 +174,19 @@ public class ParcelServiceImpl implements ParcelService {
     @Transactional
     public Parcel create(CreateParcelRequest request) {
         log.info("Creating new parcel for sender: {}, recipient: {} from PostOffice ID {} to PostOffice ID {}",
-                request.getSender(), request.getRecipient(), request.getOriginPostOfficeId(), request.getDestinationPostOfficeId());
+                request.getSenderClientId(), request.getRecipientClientId(), request.getOriginPostOfficeId(), request.getDestinationPostOfficeId());
 
         PostOffice originPostOffice = postOfficeRepository.findById(request.getOriginPostOfficeId())
                 .orElseThrow(() -> new NotFoundException("Origin Post Office with ID " + request.getOriginPostOfficeId() + " not found"));
 
         PostOffice destinationPostOffice = postOfficeRepository.findById(request.getDestinationPostOfficeId())
                 .orElseThrow(() -> new NotFoundException("Destination Post Office with ID " + request.getDestinationPostOfficeId() + " not found"));
+
+        Client senderClient = clientRepository.findById(request.getSenderClientId())
+                .orElseThrow(() -> new NotFoundException("Sender Client with ID " + request.getSenderClientId() + " not found"));
+
+        Client recipientClient = clientRepository.findById(request.getRecipientClientId())
+                .orElseThrow(() -> new NotFoundException("Recipient Client with ID " + request.getRecipientClientId() + " not found"));
 
         // Logic to determine the actual DeliveryType, defaulting to DEFAULT if null.
         DeliveryType initialDeliveryType = request.getDeliveryType();
@@ -195,15 +203,15 @@ public class ParcelServiceImpl implements ParcelService {
 
         Parcel parcel = Parcel.builder()
                 .trackingNumber(generator.uuid())
-                .sender(request.getSender())
-                .recipient(request.getRecipient())
+                .senderClient(senderClient)
+                .recipientClient(recipientClient)
                 .weight(request.getWeight())
                 .status(ParcelStatus.CREATED)
                 .originPostOffice(originPostOffice)
                 .destinationPostOffice(destinationPostOffice)
-                .deliveryType(actualDeliveryType) // Уже определено выше
+                .deliveryType(actualDeliveryType)
                 .parcelDescription(request.getParcelDescription())
-                .price(calculator.calculatePrice(request)) // Цена теперь вычисляется один раз
+                .price(calculator.calculatePrice(request))
                 .build();
 
         Parcel savedParcel = parcelRepository.save(parcel);
@@ -264,11 +272,33 @@ public class ParcelServiceImpl implements ParcelService {
      * @return A ParcelResponse DTO.
      */
     private ParcelResponse mapParcelToResponse(Parcel parcel) {
+        // Helper to map Client to ClientDto
+        ClientDto senderClientDto = null;
+        if (parcel.getSenderClient() != null) {
+            senderClientDto = ClientDto.builder()
+                    .id(parcel.getSenderClient().getId())
+                    .firstName(parcel.getSenderClient().getFirstName())
+                    .lastName(parcel.getSenderClient().getLastName())
+                    .email(parcel.getSenderClient().getEmail())
+                    .phone(parcel.getSenderClient().getPhone())
+                    .build();
+        }
+
+        ClientDto recipientClientDto = null;
+        if (parcel.getRecipientClient() != null) {
+            recipientClientDto = ClientDto.builder()
+                    .id(parcel.getRecipientClient().getId())
+                    .firstName(parcel.getRecipientClient().getFirstName())
+                    .lastName(parcel.getRecipientClient().getLastName())
+                    .email(parcel.getRecipientClient().getEmail())
+                    .phone(parcel.getRecipientClient().getPhone())
+                    .build();
+        }
         return ParcelResponse.builder()
                 .id(parcel.getId())
                 .trackingNumber(parcel.getTrackingNumber())
-                .sender(parcel.getSender())
-                .recipient(parcel.getRecipient())
+                .senderClient(senderClientDto)
+                .recipientClient(recipientClientDto)
                 .weight(parcel.getWeight())
                 .price(parcel.getPrice())
                 .status(parcel.getStatus())

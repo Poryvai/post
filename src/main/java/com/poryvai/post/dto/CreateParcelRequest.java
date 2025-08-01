@@ -1,11 +1,11 @@
 package com.poryvai.post.dto;
 
+import com.poryvai.post.model.Client;
 import com.poryvai.post.model.DeliveryType;
 import com.poryvai.post.model.ParcelDescription;
+import com.poryvai.post.model.PostOffice;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,18 +21,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateParcelRequest {
     /**
-     * The name or identifier of the sender. Must not be blank.
+     * The unique ID of the {@link Client} who is the sender of the parcel.
+     * Must be a positive number and cannot be null.
      */
-    @NotBlank(message = "Sender cannot be blank")
-    @Size(max = 128, message = "Sender name must be less than or equal to 128 characters")
-    private String sender;
+    @NotNull(message = "Sender client ID cannot be null")
+    @DecimalMin(value = "1", message = "Sender client ID must be a positive number")
+    private Long senderClientId;
 
     /**
-     * The name or identifier of the recipient. Must not be blank.
+     * The unique ID of the {@link Client} who is the recipient of the parcel.
+     * Must be a positive number and cannot be null.
      */
-    @NotBlank(message = "Recipient cannot be blank")
-    @Size(max = 128, message = "Recipient name must be less than or equal to 128 characters")
-    private String recipient;
+    @NotNull(message = "Recipient client ID cannot be null")
+    @DecimalMin(value = "1", message = "Recipient client ID must be a positive number")
+    private Long recipientClientId;
 
     /**
      * The weight of the parcel in kilograms. Must be a positive value.
@@ -54,7 +56,7 @@ public class CreateParcelRequest {
     private ParcelDescription parcelDescription;
 
     /**
-     * The ID of the post office where the parcel originated.
+     * The ID of the {@link PostOffice} where the parcel originated.
      * Must be a positive number and cannot be null.
      */
     @NotNull(message = "Origin post office ID cannot be null")
@@ -62,7 +64,7 @@ public class CreateParcelRequest {
     private Long originPostOfficeId;
 
     /**
-     * The ID of the post office where the parcel is destined to be delivered.
+     * The ID of the {@link PostOffice} where the parcel is destined to be delivered.
      * Must be a positive number and cannot be null.
      */
     @NotNull(message = "Destination post office ID cannot be null")
