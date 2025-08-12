@@ -1,8 +1,11 @@
 package com.poryvai.post.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
+
+import java.util.List;
 
 /**
  * Represents a Post Office entity in the system.
@@ -15,6 +18,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
+@ToString(exclude = "employees")
 public class PostOffice {
 
     /**
@@ -49,4 +53,13 @@ public class PostOffice {
      */
     @Column(name = "street", nullable = false, length = 255)
     private String street;
+
+    /**
+     * A list of {@link Employee} entities who work at this post office.
+     * This field establishes a one-to-many relationship, where the "postOffice" field
+     * in the Employee entity is the owning side.
+     */
+    @OneToMany(mappedBy = "postOffice", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Employee> employees;
 }

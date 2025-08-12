@@ -71,6 +71,19 @@ public class EmployeeController {
     }
 
     /**
+     * Retrieves a list of all employees working at a specific post office.
+     *
+     * @param postOfficeId The unique ID of the post office, provided as a query parameter.
+     * @param pageable An object defining pagination (page number, size) and sorting options.
+     * @return A {@link Page} of {@link EmployeeResponse} DTOs.
+     */
+    @GetMapping("/by-post-office")
+    public Page<EmployeeResponse> getEmployeesByPostOffice(@RequestParam Long postOfficeId, Pageable pageable) {
+        log.info("Received request to get employees for post office with ID: {}", postOfficeId);
+        return employeeService.getEmployeesByPostOffice(postOfficeId, pageable);
+    }
+
+    /**
      * Updates an existing employee identified by their ID.
      *
      * @param id The unique ID of the employee to update, extracted from the URL path.

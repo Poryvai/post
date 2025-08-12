@@ -27,6 +27,4 @@ public interface ParcelRepository extends JpaRepository<Parcel, Long>,
      * @return An {@link Optional} containing the found {@link Parcel}, or an empty Optional if no parcel is found.
      */
     Optional<Parcel> findByTrackingNumber(String trackingNumber);
-
-
 }
