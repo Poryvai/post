@@ -42,4 +42,11 @@ public class UpdateEmployeeRequest {
      */
     @NotNull(message = "Position cannot be null for update")
     private EmployeePosition position;
+
+    /**
+     * The ID of the PostOffice where the employee now works.
+     * Must not be null.
+     */
+    @NotNull(message = "Post office ID cannot be null for update")
+    private Long postOfficeId;
 }

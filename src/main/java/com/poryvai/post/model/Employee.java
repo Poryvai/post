@@ -1,10 +1,8 @@
 package com.poryvai.post.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldNameConstants;
 
 /**
@@ -21,6 +19,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
+@ToString(exclude = "postOffice")
 public class Employee {
 
     /**
@@ -50,4 +49,14 @@ public class Employee {
     @Enumerated(EnumType.STRING)
     @Column(name = "position", nullable = false, length = 80)
     private EmployeePosition position;
+
+    /**
+     * The {@link PostOffice} entity representing the post office
+     * where the employee works.
+     * This field establishes a many-to-one relationship with the PostOffice entity.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_office_id", nullable = false)
+    @JsonBackReference
+    private PostOffice postOffice;
 }

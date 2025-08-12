@@ -19,5 +19,6 @@ public class EmployeeResponse {
     private String firstName;
     private String lastName;
     private EmployeePosition position;
+    private PostOfficeDto postOffice;
 
 }

@@ -39,6 +39,17 @@ public interface EmployeeService {
     Page<EmployeeResponse> getAll(Pageable pageable);
 
     /**
+     * Retrieves a paginated list of all employees working at a specific post office.
+     * This method is used to find employees by the ID of their assigned post office,
+     * with support for pagination and sorting.
+     *
+     * @param postOfficeId The unique ID of the post office to search for.
+     * @param pageable     An object defining pagination (page number, size) and sorting options.
+     * @return A {@link Page} of {@link EmployeeResponse} DTOs.
+     */
+    Page<EmployeeResponse> getEmployeesByPostOffice(Long postOfficeId, Pageable pageable);
+
+    /**
      * Updates an existing employee identified by its ID.
      *
      * @param id      The unique ID of the employee to be updated.

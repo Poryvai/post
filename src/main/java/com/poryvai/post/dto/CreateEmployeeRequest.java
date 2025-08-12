@@ -1,6 +1,8 @@
 package com.poryvai.post.dto;
 
 import com.poryvai.post.model.EmployeePosition;
+import com.poryvai.post.model.PostOffice;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -41,4 +43,12 @@ public class CreateEmployeeRequest {
      */
     @NotNull(message = "Position cannot be null")
     private EmployeePosition position;
+
+    /**
+     * The ID of the {@link PostOffice} where the employee works.
+     * Must be a positive number and cannot be null.
+     */
+    @NotNull(message = "Post office ID cannot be null")
+    @DecimalMin(value = "1", message = "Post office ID must be a positive number")
+    private Long postOfficeId;
 }
