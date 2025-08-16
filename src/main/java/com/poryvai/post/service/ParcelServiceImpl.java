@@ -4,9 +4,7 @@ import com.poryvai.post.common.ComponentForProduceCycleDependency;
 import com.poryvai.post.dto.*;
 import com.poryvai.post.exception.NotFoundException;
 import com.poryvai.post.model.*;
-import com.poryvai.post.repository.ClientRepository;
-import com.poryvai.post.repository.ParcelRepository;
-import com.poryvai.post.repository.PostOfficeRepository;
+import com.poryvai.post.repository.*;
 import com.poryvai.post.service.parcel.price.PriceCalculator;
 import com.poryvai.post.util.CommonGenerator;
 import com.poryvai.post.util.ParcelSpecifications;
@@ -18,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +40,8 @@ public class ParcelServiceImpl implements ParcelService {
     private final List<PriceCalculator> priceCalculators; // Injected list of price calculation strategies
     private final ComponentForProduceCycleDependency componentForProduceCycleDependency;
     private final ClientRepository clientRepository;
+    private final EmployeeRepository employeeRepository;
+    private final ParcelLogEntryRepository parcelLogEntryRepository;
 
     /**
      * Retrieves a parcel by its unique tracking number.
@@ -216,6 +217,8 @@ public class ParcelServiceImpl implements ParcelService {
 
         Parcel savedParcel = parcelRepository.save(parcel);
         log.info("Parcel created successfully with tracking number: {}", savedParcel.getTrackingNumber());
+
+        logParcelAction(savedParcel, ParcelLogEntryActionType.RECEIVED, EmployeePosition.CLERK, originPostOffice.getId());
         return savedParcel;
     }
 
@@ -239,7 +242,75 @@ public class ParcelServiceImpl implements ParcelService {
 
         Parcel updatedParcel = parcelRepository.save(parcel);
 
+        if (status == ParcelStatus.IN_TRANSIT) {
+            logParcelAction(updatedParcel, ParcelLogEntryActionType.SENT, EmployeePosition.CLERK, updatedParcel.getOriginPostOffice().getId());
+        } else if(status == ParcelStatus.DELIVERED) {
+            logParcelAction(updatedParcel, ParcelLogEntryActionType.DELIVERED, EmployeePosition.CLERK, updatedParcel.getDestinationPostOffice().getId());
+        }
+
         return mapParcelToResponse(updatedParcel);
+    }
+
+    /**
+     * Initiates the process of sending a parcel from its current post office.
+     * This method validates the parcel's status, updates it to {@link ParcelStatus#IN_TRANSIT}
+     * if necessary, and logs a 'SENT' event.
+     *
+     * @param trackingNumber The unique tracking number of the parcel to be sent.
+     * @return The updated {@link ParcelResponse} object.
+     * @throws NotFoundException if the parcel with the specified tracking number is not found.
+     * @throws IllegalArgumentException if the parcel is not in a valid status for sending.
+     */
+    @Override
+    @Transactional
+    public ParcelResponse sendParcel(String trackingNumber) {
+        log.info("Sending parcel with tracking number: {}", trackingNumber);
+        Parcel parcel = parcelRepository.findByTrackingNumber(trackingNumber)
+                .orElseThrow(() -> new NotFoundException("Parcel with tracking number " + trackingNumber + " not found"));
+
+        if (parcel.getStatus() != ParcelStatus.CREATED && parcel.getStatus() != ParcelStatus.IN_TRANSIT) {
+            throw new IllegalArgumentException("Parcel with tracking number " + trackingNumber + " cannot be sent from its current status: " + parcel.getStatus());
+        }
+
+        // Updates the parcel's status to IN_TRANSIT, if it's not already in transit
+        if (parcel.getStatus() == ParcelStatus.CREATED) {
+            parcel.setStatus(ParcelStatus.IN_TRANSIT);
+        }
+
+        Parcel updatedParcel = parcelRepository.save(parcel);
+
+        logParcelAction(updatedParcel, ParcelLogEntryActionType.SENT, EmployeePosition.CLERK, updatedParcel.getOriginPostOffice().getId());
+
+        return mapParcelToResponse(updatedParcel);
+    }
+
+    /**
+     * Creates and saves a new log entry for a specific action performed on a parcel.
+     * This method is a helper to record an employee's interaction with a parcel,
+     * such as receiving or delivering it.
+     *
+     * @param parcel      The {@link Parcel} entity that the action was performed on.
+     * @param actionType  The type of action that was performed, from {@link ParcelLogEntryActionType}.
+     * @param employeePosition  The unique ID of the {@link Employee} who performed the action.
+     * @throws NotFoundException if the employee with the specified ID does not exist.
+     */
+    private void logParcelAction(Parcel parcel, ParcelLogEntryActionType actionType, EmployeePosition employeePosition, Long postOfficeId) {
+        Employee employee = employeeRepository.findFirstByPosition(employeePosition)
+                .orElseThrow(() -> new NotFoundException("Employee not found with ID: " + employeePosition));
+
+        PostOffice postOffice = postOfficeRepository.findById(postOfficeId)
+                .orElseThrow(() -> new NotFoundException("Post Office not found with ID: " + postOfficeId));
+
+        ParcelLogEntry logEntry = ParcelLogEntry.builder()
+                .timestamp(LocalDateTime.now())
+                .actionType(actionType)
+                .parcel(parcel)
+                .employee(employee)
+                .postOffice(postOffice)
+                .build();
+
+        parcelLogEntryRepository.save(logEntry);
+        log.info("Logged action '{}' for parcel '{}' by employee '{}'", actionType, parcel.getTrackingNumber(), EmployeePosition.CLERK);
     }
 
     /**
