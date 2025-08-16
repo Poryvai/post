@@ -118,4 +118,17 @@ public class ParcelController {
         return parcelService.updateStatus(trackingNumber, request.getStatus());
     }
 
+    /**
+     * Initiates the process of sending a parcel from its current post office.
+     * This action logs a 'SENT' event.
+     *
+     * @param trackingNumber The tracking number of the parcel to be sent.
+     * @return The updated parcel response.
+     */
+    @PostMapping("/send/{trackingNumber}")
+    public ParcelResponse sendParcel(@PathVariable String trackingNumber) {
+        log.info("Received request to send parcel with tracking number: {}", trackingNumber);
+        return parcelService.sendParcel(trackingNumber);
+    }
+
 }

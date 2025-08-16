@@ -2,6 +2,7 @@ package com.poryvai.post.service;
 
 import com.poryvai.post.dto.CreateParcelRequest;
 import com.poryvai.post.dto.ParcelResponse;
+import com.poryvai.post.exception.NotFoundException;
 import com.poryvai.post.model.Parcel;
 import com.poryvai.post.dto.ParcelSearchParams;
 import com.poryvai.post.dto.ParcelStatistic;
@@ -68,4 +69,16 @@ public interface ParcelService {
      * This exception is typically handled by a global exception handler (e.g., RestExceptionHandler).
      */
     ParcelResponse updateStatus(String trackingNumber, ParcelStatus status);
+
+    /**
+     * Initiates the process of sending a parcel from its current post office.
+     * This method validates the parcel's status, updates it to {@link ParcelStatus#IN_TRANSIT}
+     * if necessary, and logs a 'SENT' event.
+     *
+     * @param trackingNumber The unique tracking number of the parcel to be sent.
+     * @return The updated {@link ParcelResponse} object.
+     * @throws NotFoundException if the parcel with the specified tracking number is not found.
+     * @throws IllegalArgumentException if the parcel is not in a valid status for sending.
+     */
+    ParcelResponse sendParcel(String trackingNumber);
 }
