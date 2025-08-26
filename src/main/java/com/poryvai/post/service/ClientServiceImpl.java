@@ -1,15 +1,21 @@
 package com.poryvai.post.service;
 
+import com.poryvai.post.dto.ClientResponse;
+import com.poryvai.post.dto.ClientSearchParams;
 import com.poryvai.post.dto.CreateClientRequest;
 import com.poryvai.post.exception.NotFoundException;
 import com.poryvai.post.model.Client;
 import com.poryvai.post.repository.ClientRepository;
+import com.poryvai.post.util.ClientSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation for managing {@link Client} entities.
@@ -66,9 +72,11 @@ public class ClientServiceImpl implements ClientService{
      */
     @Override
     @Transactional(readOnly = true)
-    public List<Client> getAll() {
+    public List<ClientResponse> getAll() {
         log.info("Fetching all clients");
-        return clientRepository.findAll();
+        return clientRepository.findAll().stream()
+                .map(ClientResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -110,5 +118,19 @@ public class ClientServiceImpl implements ClientService{
         }
         clientRepository.deleteById(id);
         log.info("Client with ID: {} deleted successfully.", id);
+    }
+
+    /**
+     * Searches for clients based on dynamic criteria.
+     *
+     * @param params   The search parameters as defined in {@link ClientSearchParams}.
+     * @param pageable The pagination and sorting information.
+     * @return A {@link Page} of clients that match the search criteria.
+     */
+    @Override
+    public Page<ClientResponse> searchClients(ClientSearchParams params, Pageable pageable) {
+        log.info("Searching clients with parameters: {}", params);
+        Page<Client> clientPage = clientRepository.findAll(ClientSpecifications.withDynamicQuery(params), pageable);
+        return clientPage.map(ClientResponse::fromEntity);
     }
 }

@@ -1,11 +1,11 @@
 package com.poryvai.post.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldNameConstants;
+
+import java.util.List;
 
 /**
  * Represents a Client in the postal system.
@@ -19,6 +19,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
+@ToString(exclude = {"sentParcels", "receivedParcels"})
 public class Client {
 
     /**
@@ -53,4 +54,22 @@ public class Client {
      */
     @Column(name = "phone", nullable = false, length = 20)
     private String phone;
+
+    /**
+     * A list of parcels sent by this client.
+     * This establishes a one-to-many relationship with the Parcel entity,
+     * mapped by the 'senderClient' field in the Parcel entity.
+     */
+    @OneToMany(mappedBy = "senderClient", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Parcel> sentParcels;
+
+    /**
+     * A list of parcels received by this client.
+     * This establishes a one-to-many relationship with the Parcel entity,
+     * mapped by the 'recipientClient' field in the Parcel entity.
+     */
+    @OneToMany(mappedBy = "recipientClient", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Parcel> receivedParcels;
 }

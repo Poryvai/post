@@ -1,11 +1,15 @@
 package com.poryvai.post.controller;
 
+import com.poryvai.post.dto.ClientResponse;
+import com.poryvai.post.dto.ClientSearchParams;
 import com.poryvai.post.dto.CreateClientRequest;
 import com.poryvai.post.model.Client;
 import com.poryvai.post.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +52,7 @@ public class ClientController {
      * @return A list of all {@link Client} objects.
      */
     @GetMapping
-    public List<Client> getAll(){
+    public List<ClientResponse> getAll(){
         log.info("Received request to get all clients");
         return clientService.getAll();
     }
@@ -76,5 +80,19 @@ public class ClientController {
     public void delete(@PathVariable Long id){
         log.info("Received request to delete client by ID: {}", id);
         clientService.delete(id);
+    }
+
+    /**
+     * Searches for clients based on dynamic criteria.
+     * The search parameters are passed as request parameters.
+     *
+     * @param params   The {@link ClientSearchParams} object containing search criteria.
+     * @param pageable The pagination and sorting information.
+     * @return A paginated list of clients matching the criteria.
+     */
+    @GetMapping("/search")
+    public Page<ClientResponse> searchClients(ClientSearchParams params, Pageable pageable) {
+        log.info("Received search request for clients with parameters: {}", params);
+        return clientService.searchClients(params, pageable);
     }
 }
