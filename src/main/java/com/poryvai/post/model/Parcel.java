@@ -1,8 +1,11 @@
 package com.poryvai.post.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
+
+import java.util.Set;
 
 /**
  * Represents a parcel entity in the system.
@@ -16,6 +19,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
+@ToString(exclude = {"senderClient", "recipientClient", "parcelLogEntries"})
 public class Parcel {
 
     /**
@@ -40,6 +44,7 @@ public class Parcel {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_sender_id", nullable = false)
+    @JsonBackReference
     private Client senderClient;
 
 
@@ -49,6 +54,7 @@ public class Parcel {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_recipient_id", nullable = false)
+    @JsonBackReference
     private Client recipientClient;
 
     /**
@@ -104,4 +110,15 @@ public class Parcel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "destination_post_office_id", nullable = false)
     private PostOffice destinationPostOffice;
+
+    /**
+     * A collection of log entries associated with this parcel.
+     * This establishes a one-to-many relationship with ParcelLogEntry.
+     * The `mappedBy` attribute indicates that the 'parcel' field in ParcelLogEntry
+     * owns the relationship. The `cascade` and `orphanRemoval` attributes ensure
+     * that log entries are managed with the parcel.
+     */
+    @OneToMany(mappedBy = "parcel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("timestamp ASC")
+    private Set<ParcelLogEntry> parcelLogEntries;
 }

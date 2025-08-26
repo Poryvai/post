@@ -69,4 +69,5 @@ public class ParcelLogEntry {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_office_id", nullable = false)
     private PostOffice postOffice;
+
 }
