@@ -1,8 +1,6 @@
 package com.poryvai.post.controller;
 
-import com.poryvai.post.dto.CreateEmployeeRequest;
-import com.poryvai.post.dto.EmployeeResponse;
-import com.poryvai.post.dto.UpdateEmployeeRequest;
+import com.poryvai.post.dto.*;
 import com.poryvai.post.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -111,5 +109,19 @@ public class EmployeeController {
         log.info("Received request to delete employee by ID: {}", id);
         employeeService.delete(id);
         log.info("Employee with ID: {} deleted successfully.", id);
+    }
+
+    /**
+     * Searches for employees based on dynamic criteria.
+     * The search parameters are passed as request parameters.
+     *
+     * @param params   The {@link EmployeeSearchParams} object containing search criteria.
+     * @param pageable The pagination and sorting information.
+     * @return A paginated list of employees matching the criteria.
+     */
+    @GetMapping("/search")
+    public Page<EmployeeResponse> searchEmployees(EmployeeSearchParams params, Pageable pageable){
+        log.info("Received request to search employees with criteria: {}", params);
+        return employeeService.searchEmployees(params, pageable);
     }
 }

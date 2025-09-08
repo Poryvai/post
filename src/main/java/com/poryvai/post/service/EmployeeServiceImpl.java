@@ -1,20 +1,24 @@
 package com.poryvai.post.service;
 
-import com.poryvai.post.dto.CreateEmployeeRequest;
-import com.poryvai.post.dto.EmployeeResponse;
-import com.poryvai.post.dto.PostOfficeDto;
-import com.poryvai.post.dto.UpdateEmployeeRequest;
+import com.poryvai.post.dto.*;
 import com.poryvai.post.exception.NotFoundException;
 import com.poryvai.post.model.Employee;
 import com.poryvai.post.model.PostOffice;
 import com.poryvai.post.repository.EmployeeRepository;
 import com.poryvai.post.repository.PostOfficeRepository;
+import com.poryvai.post.util.EmployeeSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the {@link EmployeeService} interface.
@@ -157,6 +161,22 @@ public class EmployeeServiceImpl implements EmployeeService{
         }
         employeeRepository.deleteById(id);
         log.info("Employee with ID: {} deleted successfully.", id);
+    }
+
+    /**
+     * Searches for employees based on dynamic criteria.
+     *
+     * @param params   The search parameters as defined in {@link EmployeeSearchParams}.
+     * @param pageable The pagination and sorting information.
+     * @return A {@link Page} of employees that match the search criteria.
+     */
+    @Override
+    public Page<EmployeeResponse> searchEmployees(EmployeeSearchParams params, Pageable pageable) {
+        log.info("Searching employees with criteria: {}", params);
+        Page<Employee> employeesPage = employeeRepository.findAll(EmployeeSpecifications.withDynamicQuery(params), pageable);
+
+        log.info("Found {} employees matching the search criteria.", employeesPage.getTotalElements());
+        return employeesPage.map(this::mapEmployeeToResponse);
     }
 
     /**

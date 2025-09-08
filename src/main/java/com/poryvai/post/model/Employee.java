@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
 
+import java.util.Set;
+
 /**
  * Represents an Employee entity in the postal service system.
  * This class maps to a database table and holds essential details about a specific employee,
@@ -19,7 +21,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-@ToString(exclude = "postOffice")
+@ToString(exclude = {"postOffice", "parcelLogEntries"})
 public class Employee {
 
     /**
@@ -59,4 +61,16 @@ public class Employee {
     @JoinColumn(name = "post_office_id", nullable = false)
     @JsonBackReference
     private PostOffice postOffice;
+
+    /**
+     * A collection of log entries representing actions performed by this employee on parcels.
+     * This establishes a one-to-many relationship with the {@link ParcelLogEntry} entity.
+     * The `mappedBy` attribute indicates that the 'employee' field in ParcelLogEntry
+     * owns the relationship, and `cascade` ensures that related log entries are
+     * managed with the employee (e.g., deleted when the employee is).
+     */
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("timestamp ASC")
+    private Set<ParcelLogEntry> parcelLogEntries;
+
 }
