@@ -173,7 +173,7 @@ public class ParcelServiceImpl implements ParcelService {
      */
     @Override
     @Transactional
-    public Parcel create(CreateParcelRequest request) {
+    public ParcelResponse create(CreateParcelRequest request) {
         log.info("Creating new parcel for sender: {}, recipient: {} from PostOffice ID {} to PostOffice ID {}",
                 request.getSenderClientId(), request.getRecipientClientId(), request.getOriginPostOfficeId(), request.getDestinationPostOfficeId());
 
@@ -200,8 +200,6 @@ public class ParcelServiceImpl implements ParcelService {
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("No price calculator found for delivery type: " + actualDeliveryType));
 
-
-
         Parcel parcel = Parcel.builder()
                 .trackingNumber(generator.uuid())
                 .senderClient(senderClient)
@@ -219,7 +217,7 @@ public class ParcelServiceImpl implements ParcelService {
         log.info("Parcel created successfully with tracking number: {}", savedParcel.getTrackingNumber());
 
         logParcelAction(savedParcel, ParcelLogEntryActionType.RECEIVED, EmployeePosition.CLERK, originPostOffice.getId());
-        return savedParcel;
+        return mapParcelToResponse(savedParcel);
     }
 
     /**
@@ -295,7 +293,7 @@ public class ParcelServiceImpl implements ParcelService {
      * @throws NotFoundException if the employee with the specified ID does not exist.
      */
     private void logParcelAction(Parcel parcel, ParcelLogEntryActionType actionType, EmployeePosition employeePosition, Long postOfficeId) {
-        Employee employee = employeeRepository.findFirstByPosition(employeePosition)
+        Employee employee = employeeRepository.findFirstByPositionAndPostOfficeId(employeePosition, postOfficeId)
                 .orElseThrow(() -> new NotFoundException("Employee not found with ID: " + employeePosition));
 
         PostOffice postOffice = postOfficeRepository.findById(postOfficeId)

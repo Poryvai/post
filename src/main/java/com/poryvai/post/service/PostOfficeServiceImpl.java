@@ -1,7 +1,6 @@
 package com.poryvai.post.service;
 
-import com.poryvai.post.dto.CreatePostOfficeRequest;
-import com.poryvai.post.dto.PostOfficeSearchParams;
+import com.poryvai.post.dto.*;
 import com.poryvai.post.exception.NotFoundException;
 import com.poryvai.post.model.PostOffice;
 import com.poryvai.post.repository.PostOfficeRepository;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation for managing {@link PostOffice} entities.
@@ -120,11 +120,31 @@ public class PostOfficeServiceImpl implements PostOfficeService{
      *
      * @param params   {@link PostOfficeSearchParams} containing optional filters for post offices.
      * @param pageable {@link Pageable} object for pagination and sorting.
-     * @return A {@link Page} of {@link PostOffice} objects matching the search criteria.
+     * @return A {@link Page} of {@link PostOfficeDto} objects matching the search criteria.
      */
     @Override
-    public Page<PostOffice> findAll(PostOfficeSearchParams params, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<PostOfficeDto> findAll(PostOfficeSearchParams params, Pageable pageable) {
         log.info("Retrieving post offices with search parameters: {} and pageable: {}", params, pageable);
-        return postOfficeRepository.findAll(PostOfficeSpecifications.bySearchParams(params), pageable);
+        Page<PostOffice> postOffices = postOfficeRepository.findAll(PostOfficeSpecifications.bySearchParams(params), pageable);
+
+        return postOffices.map(this::mapPostOfficeToDto);
+    }
+
+
+    /**
+     * Converts a PostOffice entity to a PostOfficeDto DTO.
+     *
+     * @param postOffice The PostOffice entity to convert.
+     * @return A new PostOfficeDto object.
+     */
+    private PostOfficeDto mapPostOfficeToDto(PostOffice postOffice) {
+        return PostOfficeDto.builder()
+                .id(postOffice.getId())
+                .name(postOffice.getName())
+                .city(postOffice.getCity())
+                .postcode(postOffice.getPostcode())
+                .street(postOffice.getStreet())
+                .build();
     }
 }

@@ -1,6 +1,7 @@
 package com.poryvai.post.controller;
 
 import com.poryvai.post.dto.CreatePostOfficeRequest;
+import com.poryvai.post.dto.PostOfficeDto;
 import com.poryvai.post.dto.PostOfficeSearchParams;
 import com.poryvai.post.model.PostOffice;
 import com.poryvai.post.service.PostOfficeService;
@@ -61,7 +62,7 @@ public class PostOfficeController {
      * @return A {@link Page} of {@link PostOffice} objects matching the search criteria.
      */
     @GetMapping
-    public Page<PostOffice> findAll(PostOfficeSearchParams params, Pageable pageable) {
+    public Page<PostOfficeDto> findAll(PostOfficeSearchParams params, Pageable pageable) {
         log.info("Received request to find all post offices with params: {} and pageable: {}", params, pageable);
         return postOfficeService.findAll(params, pageable);
     }
@@ -91,6 +92,4 @@ public class PostOfficeController {
         log.info("Received request to delete post office by ID: {}", id);
         postOfficeService.delete(id);
     }
-
-
 }

@@ -6,8 +6,13 @@ import com.poryvai.post.model.EmployeePosition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -16,7 +21,7 @@ import java.util.Optional;
  * Provides standard CRUD operations for Employee entities.
  */
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSpecificationExecutor<Employee> {
 
     /**
      * Finds all {@link Employee} entities associated with a specific post office.
@@ -38,4 +43,13 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * @return An {@link Optional} containing the found employee, or an empty optional.
      */
     Optional<Employee> findFirstByPosition(EmployeePosition position);
+
+    /**
+     * Finds the first {@link Employee} with a specific position at a given post office.
+     *
+     * @param position The position of the employee.
+     * @param postOfficeId The ID of the post office the employee works at.
+     * @return An {@link Optional} containing the found employee, or an empty optional if none is found.
+     */
+    Optional<Employee> findFirstByPositionAndPostOfficeId(EmployeePosition position, Long postOfficeId);
 }

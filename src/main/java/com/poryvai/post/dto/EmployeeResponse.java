@@ -20,5 +20,4 @@ public class EmployeeResponse {
     private String lastName;
     private EmployeePosition position;
     private PostOfficeDto postOffice;
-
 }

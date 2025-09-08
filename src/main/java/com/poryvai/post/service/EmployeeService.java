@@ -1,8 +1,6 @@
 package com.poryvai.post.service;
 
-import com.poryvai.post.dto.CreateEmployeeRequest;
-import com.poryvai.post.dto.EmployeeResponse;
-import com.poryvai.post.dto.UpdateEmployeeRequest;
+import com.poryvai.post.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -67,4 +65,13 @@ public interface EmployeeService {
      * @throws com.poryvai.post.exception.NotFoundException if no employee with the specified ID is found.
      */
     void delete(Long id);
+
+    /**
+     * Searches for employees based on dynamic criteria.
+     *
+     * @param params   The search parameters as defined in {@link EmployeeSearchParams}.
+     * @param pageable The pagination and sorting information.
+     * @return A {@link Page} of employees that match the search criteria.
+     */
+    Page<EmployeeResponse> searchEmployees(EmployeeSearchParams params, Pageable pageable);
 }

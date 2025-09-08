@@ -35,7 +35,7 @@ public interface ParcelService {
      * @param pageable An object defining pagination (page number, size) and sorting options.
      * @return A {@link Page} of {@link ParcelResponse} DTOs that match the specified criteria.
      */
-    Page< ParcelResponse> findAll(ParcelSearchParams params, Pageable pageable);
+    Page<ParcelResponse> findAll(ParcelSearchParams params, Pageable pageable);
 
     /**
      * Builds and returns a statistical summary of parcels based on specified search parameters.
@@ -56,7 +56,7 @@ public interface ParcelService {
      * @return The newly created {@link Parcel} object, persisted in the database.
      * @throws IllegalArgumentException if an invalid delivery type is provided or a price calculator is not found.
      */
-    Parcel create(CreateParcelRequest request);
+    ParcelResponse create(CreateParcelRequest request);
 
     /**
      * Updates the status of an existing parcel.

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * DTO for representing Post Office information in API responses.
  * Provides a simplified view of the PostOffice entity,

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * REST Controller for managing parcel-related operations.
  * Provides endpoints for creating, retrieving, updating parcel statuses,
@@ -90,7 +92,7 @@ public class ParcelController {
      * if the specified post offices do not exist.
      */
     @PostMapping
-    public Parcel create(@Valid @RequestBody CreateParcelRequest request) {
+    public ParcelResponse create(@Valid @RequestBody CreateParcelRequest request) {
         log.info("Received request to create parcel for sender: {}, recipient: {} from origin PostOffice ID: {}, to destination PostOffice ID: {}",
                 request.getSenderClientId(),
                 request.getRecipientClientId(),
@@ -130,5 +132,4 @@ public class ParcelController {
         log.info("Received request to send parcel with tracking number: {}", trackingNumber);
         return parcelService.sendParcel(trackingNumber);
     }
-
 }
